@@ -17,11 +17,11 @@ OLCHOME = ../../Oberon/oberon-lang/test/oberon
 LIB = $(OLCHOME)/lib
 INC = .:$(OLCHOME)/include
 OLC = $(OLCHOME)/oberon-lang
-OLCFLAGS = -v -c -O3 -I$(INC) -L$(LIB) -loberon
+OLCFLAGS = -O3 -I$(INC) -L$(LIB) -loberon
 LDFLAGS = -loberon
 ifeq ($(OS), macos)
 	CXX = clang
-	LDFLAGS += -rpath @executable_path/lib
+	LDFLAGS += -rpath $(LIB) #@executable_path/lib
 else ifeq ($(OS), linux)
 	CXX = gcc
 	O7CFLAGS += --reloc=pic
@@ -39,14 +39,21 @@ else ifeq ($(OS), linux)
 	@find . -maxdepth 1 -type f ! -name "*.*" -executable -delete
 endif
 
+all: SOM.o Benchmark.o List.o Harness.o
+	@$(CXX) $(CXXFLAGS) -o run SOM.o Benchmark.o List.o Harness.o -L$(LIB) $(LDFLAGS)
+
+Harness.o: 
+	@$(OLC) $(OLCFLAGS) -c -fenable-main Harness.Mod
+
 % : %.o
 	@$(CXX) $(CXXFLAGS) $< -o $@ -L$(LIB) $(LDFLAGS)
 
 %.o : %.Mod
-	@$(OLC) $(OLCFLAGS) $<
+	@$(OLC) $(OLCFLAGS) -c $<
 
 %.s : %.Mod
 	@$(OLC) $(OLCFLAGS) -S $<
 
 %.ll : %.Mod
 	@$(OLC) $(OLCFLAGS) -S --emit-llvm $<
+
