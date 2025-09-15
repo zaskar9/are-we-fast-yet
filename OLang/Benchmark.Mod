@@ -31,7 +31,7 @@ TYPE
   BenchmarkDesc* = RECORD (SOM.ObjectDesc) 
                       InnerBenchmarkLoop*: PROCEDURE(b: Benchmark; innerIterations: INTEGER): BOOLEAN;
                       DoBenchmark*: PROCEDURE(b: Benchmark): SOM.Object;
-                      VerifyResult*: PROCEDURE(b: Benchmark; result: SOM.Object): BOOLEAN;
+                      VerifyResult*: PROCEDURE(b: Benchmark; result: SOM.Object): BOOLEAN
                   END;
 
 PROCEDURE InnerBenchmarkLoop*(b: Benchmark; innerIterations: INTEGER): BOOLEAN;
@@ -42,9 +42,9 @@ BEGIN
   WHILE (i < innerIterations) & success DO
     result := b.DoBenchmark(b);
     success := b.VerifyResult(b, result);
-    INC(i);
+    INC(i)
   END;
-  RETURN success;
+  RETURN success
 END InnerBenchmarkLoop;
 
 PROCEDURE DoBenchmark(b: Benchmark): SOM.Object;
@@ -68,7 +68,7 @@ BEGIN
   b.DoBenchmark := DoBenchmark;
   b.VerifyResult := VerifyResult;
   b.InnerBenchmarkLoop := InnerBenchmarkLoop;
-  RETURN b;
+  RETURN b
 END Create;
 
 END Benchmark.

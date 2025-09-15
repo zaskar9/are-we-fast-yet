@@ -35,9 +35,9 @@ TYPE
   INT32 = SOM.INT32;
   Element = POINTER TO ElementDesc;
   ElementDesc* = RECORD (SOM.ObjectDesc)
-                  val: INT32;
-                  next: Element;
-                  END;
+                   val: INT32;
+                   next: Element
+                 END;
   
   List = POINTER TO ListDesc;
   ListDesc* = RECORD (Benchmark.BenchmarkDesc) END;
@@ -45,7 +45,7 @@ TYPE
   (* Helper record to wrap the integer result into a SOM.Object. *)
   IntegerObject = POINTER TO IntegerObjectDesc;
   IntegerObjectDesc = RECORD (SOM.ObjectDesc)
-                      value: INT32;
+                        value: INT32
                       END;
 
 (* --- Private Helper Procedures (Not Exported) --- *)
@@ -54,10 +54,10 @@ TYPE
 PROCEDURE ElementLength(e: Element): INT32;
 BEGIN
   IF e.next = NIL THEN
-    RETURN 1;
+    RETURN 1
   ELSE
-    RETURN 1 + ElementLength(e.next);
-  END;
+    RETURN 1 + ElementLength(e.next)
+  END
 END ElementLength;
 
 (* Recursively creates a linked list of a given length. *)
@@ -65,13 +65,13 @@ PROCEDURE MakeList(length: INT32): Element;
 VAR e: Element;
 BEGIN
   IF length = 0 THEN
-    RETURN NIL;
+    RETURN NIL
   ELSE
     NEW(e);
     e.val := length;
     e.next := MakeList(length - 1);
-    RETURN e;
-  END;
+    RETURN e
+  END
 END MakeList;
 
 (* Checks if list x is shorter than list y. *)
@@ -83,9 +83,9 @@ BEGIN
   WHILE yTail # NIL DO
     IF xTail = NIL THEN RETURN TRUE END;
     xTail := xTail.next;
-    yTail := yTail.next;
+    yTail := yTail.next
   END;
-  RETURN FALSE;
+  RETURN FALSE
 END IsShorterThan;
 
 (* The core, mutually recursive algorithm of the benchmark. *)
@@ -94,10 +94,10 @@ BEGIN
   IF IsShorterThan(y, x) THEN
     RETURN Tail(Tail(x.next, y, z),
       Tail(y.next, z, x),
-      Tail(z.next, x, y));
+      Tail(z.next, x, y))
   ELSE
-    RETURN z;
-  END;
+    RETURN z
+  END
 END Tail;
 
 (* procedure to run the main benchmark logic. *)
@@ -107,21 +107,20 @@ VAR
   resultObj: IntegerObject;
 BEGIN
   resultList := Tail(MakeList(15), MakeList(10), MakeList(6));
-
   NEW(resultObj);
   resultObj.value := ElementLength(resultList);
-  RETURN resultObj;
+  RETURN resultObj
 END DoBenchmark;
 
 (* procedure to verify the benchmark's result. *)
 PROCEDURE VerifyResult(b: Benchmark.Benchmark; result: SOM.Object): BOOLEAN;
 BEGIN
   IF result IS IntegerObject THEN
-    RETURN result(IntegerObject).value = 10;
+    RETURN result(IntegerObject).value = 10
   ELSE
     Out.String("List verification failed: result is not an IntegerObject."); Out.Ln;
-    RETURN FALSE;
-  END;
+    RETURN FALSE
+  END
 END VerifyResult;
 
 (* Public factory procedure to create a new List benchmark instance. *)
@@ -133,7 +132,7 @@ BEGIN
   l.DoBenchmark := DoBenchmark;
   l.VerifyResult := VerifyResult;
   l.InnerBenchmarkLoop := Benchmark.InnerBenchmarkLoop;
-  RETURN l;
+  RETURN l
 END Create;
 
 END List.

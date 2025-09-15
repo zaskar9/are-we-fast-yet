@@ -30,12 +30,12 @@ IMPORT SYSTEM, Out;
 CONST
   INITIALVECTORSIZE* = 50;
   INITIALSETSIZE*    = 10;
-  INITIALCAPACITY*    = 16;
+  INITIALCAPACITY*   = 16;
 
 --- *)
 
 TYPE
-  INT32* = LONGINT;
+  INT32* = INTEGER;
   F64* = LONGREAL;
 
   (* The base type for all objects in the benchmark suite. *)

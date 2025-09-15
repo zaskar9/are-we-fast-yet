@@ -28,6 +28,7 @@ else ifeq ($(OS), linux)
 	LDFLAGS += -lm -Wl,-rpath,$(LIB)
 endif
 
+.DEFAULT_GOAL: all
 .PHONY: clean
 .PRECIOUS: %.s %.ll
 
@@ -39,8 +40,8 @@ else ifeq ($(OS), linux)
 	@find . -maxdepth 1 -type f ! -name "*.*" -executable -delete
 endif
 
-all: SOM.o Benchmark.o List.o Harness.o
-	@$(CXX) $(CXXFLAGS) -o run SOM.o Benchmark.o List.o Harness.o -L$(LIB) $(LDFLAGS)
+all: SOM.o Benchmark.o Random.o Bounce.o List.o Mandelbrot.o Harness.o
+	@$(CXX) $(CXXFLAGS) -o run SOM.o Benchmark.o Random.o Bounce.o List.o Mandelbrot.o Harness.o -L$(LIB) $(LDFLAGS)
 
 Harness.o: 
 	@$(OLC) $(OLCFLAGS) -c -fenable-main Harness.Mod

@@ -23,8 +23,8 @@
  
 MODULE Harness;
 
-IMPORT Out, Benchmark, (* Towers, Sieve, Queens, Storage, Permute, Mandelbrot, *)
-       List, (* Bounce, NBody, Richards, Unix, *) Oberon, S := SYSTEM;
+IMPORT Out, Benchmark, (* Towers, Sieve, Queens, Storage, Permute, *)
+       Bounce, List, Mandelbrot, (* NBody, Richards, Unix, *) Oberon, S := SYSTEM;
 
 TYPE
   Run = POINTER TO RunDesc;
@@ -33,7 +33,7 @@ TYPE
     benchmark: Benchmark.Benchmark;
     numIterations: LONGINT;
     innerIterations: INTEGER;
-    total: LONGINT;
+    total: LONGINT
   END;
 
 VAR
@@ -41,27 +41,27 @@ VAR
     
 PROCEDURE InitTime ();
 BEGIN
-  timeStart := Oberon.TimeMillis();
+  timeStart := Oberon.TimeMillis()
 END InitTime; 
 
 PROCEDURE Time (): LONGINT;
  VAR now: LONGINT; res, sec, usec: LONGINT;
 BEGIN
  now := Oberon.TimeMillis();
- RETURN now - timeStart;
+ RETURN now - timeStart
 END Time; 
 
 PROCEDURE SelectBenchmark(name: ARRAY OF CHAR): Benchmark.Benchmark;
 BEGIN
-  IF name = "List" THEN RETURN List.Create()
+  IF name = "Bounce" THEN RETURN Bounce.Create()
+  ELSIF name = "List" THEN RETURN List.Create()
+  ELSIF name = "Mandelbrot" THEN RETURN Mandelbrot.Create()
 (*
   ELSIF name = "Sieve" THEN RETURN Sieve.Create()
   ELSIF name = "Queens" THEN RETURN Queens.Create()
   ELSIF name = "Storage" THEN RETURN Storage.Create()
   ELSIF name = "Permute" THEN RETURN Permute.Create()
-  ELSIF name = "Mandelbrot" THEN RETURN Mandelbrot.Create()
   ELSIF name = "Towers" THEN RETURN Towers.Create()
-  ELSIF name = "Bounce" THEN RETURN Bounce.Create()
   ELSIF name = "NBody" THEN RETURN NBody.Create()
   ELSIF name = "Richards" THEN RETURN Richards.Create()
   ELSIF name = "Json" THEN RETURN Json.Create()
@@ -69,18 +69,18 @@ BEGIN
   ELSIF name = "DeltaBlue" THEN RETURN DeltaBlue.Create()
   ELSIF name = "Havlak" THEN RETURN Havlak.Create()
 *)
-  ELSE Out.String("Benchmark not found: "); Out.String(name); Out.Ln; HALT(100);
+  ELSE Out.String("Benchmark not found: "); Out.String(name); Out.Ln; HALT(100)
   END;
-  RETURN NIL;
+  RETURN NIL
 END SelectBenchmark;
 
 PROCEDURE Measure(run: Run);
   VAR startTime, endTime, runTime: LONGINT;
 BEGIN
   startTime := Time();
-  IF ~run.benchmark.InnerBenchmarkLoop(run.benchmark,run.innerIterations) THEN
+  IF ~run.benchmark.InnerBenchmarkLoop(run.benchmark, run.innerIterations) THEN
     Out.String("Benchmark failed with incorrect result."); Out.Ln;
-    HALT(101);
+    HALT(101)
   END;
   endTime := Time();
   runTime := endTime - startTime;
@@ -89,15 +89,15 @@ BEGIN
   Out.String(run.name); Out.String(": iterations=1 runtime: ");
   Out.Int(runTime * 1000, 0); Out.String("us"); Out.Ln;
   *)
-  run.total := run.total + runTime;
+  run.total := run.total + runTime
 END Measure;
 
 PROCEDURE DoRuns(run: Run);
   VAR i: LONGINT;
 BEGIN
   FOR i := 1 TO run.numIterations DO
-    Measure(run);
-  END;
+    Measure(run)
+  END
 END DoRuns;
 
 PROCEDURE ReportBenchmark(run: Run);
@@ -106,14 +106,14 @@ BEGIN
   Out.String(run.name); Out.String(": iterations="); Out.Long(run.numIterations, 0);
   avg := run.total DIV run.numIterations;
   Out.String(" average: "); Out.Long(avg, 0); Out.String("us total: ");
-  Out.Long(run.total, 0); Out.String("us"); Out.Ln; Out.Ln;
+  Out.Long(run.total, 0); Out.String("us"); Out.Ln; Out.Ln
 END ReportBenchmark;
 
 PROCEDURE RunBenchmark(run: Run);
 BEGIN
   Out.String("Starting "); Out.String(run.name); Out.String(" benchmark ..."); Out.Ln;
   DoRuns(run);
-  ReportBenchmark(run);
+  ReportBenchmark(run)
 END RunBenchmark;
 
 PROCEDURE PrintTotal(run: Run);
@@ -134,16 +134,16 @@ BEGIN
   run.total := 0;
   run.benchmark := SelectBenchmark(run.name);
   RunBenchmark(run);
-  PrintTotal(run);
+  PrintTotal(run)
 END DoRun;
 
 PROCEDURE TestRun*;
 BEGIN
+    DoRun("Bounce", 1, 1);
     DoRun("List", 1, 1);
+    DoRun("Mandelbrot", 1, 750);
 (*    
     DoRun("Richards", 1, 1);
-    DoRun("Bounce", 1, 1);
-    DoRun("Mandelbrot", 1, 1);
     DoRun("NBody", 1, 1);
     DoRun("Permute", 1, 1);
     DoRun("Queens", 1, 1);
@@ -155,11 +155,11 @@ END TestRun;
 
 PROCEDURE FullRun*;
 BEGIN
+    DoRun("Bounce", 1500, 1);
     DoRun("List", 1500, 1);
 (*
+    DoRun("Mandelbrot", 1500, 750);
     DoRun("Richards", 100, 1);
-    DoRun("Bounce", 1500, 1);
-    DoRun("Mandelbrot", 500, 1);
     DoRun("NBody", 250000, 1);
     DoRun("Permute", 1000, 1);
     DoRun("Queens", 1000, 1);
@@ -171,6 +171,7 @@ END FullRun;
 
 BEGIN
     InitTime;
+    TestRun;
     FullRun
 END Harness.
 
