@@ -58,7 +58,7 @@ IMPORT Benchmark, SOM, SYSTEM, Out;
 TYPE
   INT32 = SOM.INT32;
   F64 = SOM.F64;
-  Mandelbrot* = POINTER TO MandelbrotDesc;
+  Mandelbrot = POINTER TO MandelbrotDesc;
   MandelbrotDesc* = RECORD (Benchmark.BenchmarkDesc)
   END;
 
@@ -83,12 +83,12 @@ BEGIN
 
   y := 0;
   WHILE y < size DO
-    ci := (2.0E64 *1.0E-64 * y / size) - 1.0;
+    ci := (2.0D+0 * y / size) - 1.0;
     x := 0;
     WHILE x < size DO
       zr := 0.0; zrzr := 0.0;
       zi := 0.0; zizi := 0.0;
-      cr := (2.0E64 *1.0E-64 * x / size) - 1.5;
+      cr := (2.0D+0 * x / size) - 1.5;
 
       z := 0; notDone := TRUE; escape := 0;
       WHILE notDone & (z < 50) DO
@@ -128,7 +128,6 @@ PROCEDURE VerifyResult*(b: Benchmark.Benchmark; result: SOM.Object; innerIterati
 BEGIN
   IF result IS IntegerObject THEN
     val := result(IntegerObject).value;
-    Out.Long(val, 0); Out.Ln;
     IF innerIterations = 500 THEN RETURN val = 191
     ELSIF innerIterations = 750 THEN RETURN val = 50
     ELSIF innerIterations = 1 THEN RETURN val = 128

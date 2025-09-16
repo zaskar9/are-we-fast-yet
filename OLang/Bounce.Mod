@@ -46,8 +46,7 @@ TYPE
   END;
 
   Bounce = POINTER TO BounceDesc;
-  BounceDesc* = RECORD (Benchmark.BenchmarkDesc)
-  END;
+  BounceDesc* = RECORD (Benchmark.BenchmarkDesc) END;
 
   (* Helper record to wrap the integer result into a SOM.Object. *)
   IntegerObject = POINTER TO IntegerObjectDesc;

@@ -23,8 +23,8 @@
  
 MODULE Harness;
 
-IMPORT Out, Benchmark, (* Towers, Sieve, Queens, Storage, Permute, *)
-       Bounce, List, Mandelbrot, (* NBody, Richards, Unix, *) Oberon, S := SYSTEM;
+IMPORT Out, Benchmark, Bounce, List, Mandelbrot, NBody, Permute, Towers, Oberon, S := SYSTEM;
+  (* Sieve, Queens, Storage, Richards *)
 
 TYPE
   Run = POINTER TO RunDesc;
@@ -41,13 +41,13 @@ VAR
     
 PROCEDURE InitTime ();
 BEGIN
-  timeStart := Oberon.TimeMillis()
+  timeStart := Oberon.TimeMicros()
 END InitTime; 
 
 PROCEDURE Time (): LONGINT;
- VAR now: LONGINT; res, sec, usec: LONGINT;
+ VAR now: LONGINT;
 BEGIN
- now := Oberon.TimeMillis();
+ now := Oberon.TimeMicros();
  RETURN now - timeStart
 END Time; 
 
@@ -56,13 +56,13 @@ BEGIN
   IF name = "Bounce" THEN RETURN Bounce.Create()
   ELSIF name = "List" THEN RETURN List.Create()
   ELSIF name = "Mandelbrot" THEN RETURN Mandelbrot.Create()
+  ELSIF name = "NBody" THEN RETURN NBody.Create()
+  ELSIF name = "Permute" THEN RETURN Permute.Create()
+  ELSIF name = "Towers" THEN RETURN Towers.Create()
 (*
   ELSIF name = "Sieve" THEN RETURN Sieve.Create()
   ELSIF name = "Queens" THEN RETURN Queens.Create()
   ELSIF name = "Storage" THEN RETURN Storage.Create()
-  ELSIF name = "Permute" THEN RETURN Permute.Create()
-  ELSIF name = "Towers" THEN RETURN Towers.Create()
-  ELSIF name = "NBody" THEN RETURN NBody.Create()
   ELSIF name = "Richards" THEN RETURN Richards.Create()
   ELSIF name = "Json" THEN RETURN Json.Create()
   ELSIF name = "CD" THEN RETURN CD.Create()
@@ -87,7 +87,7 @@ BEGIN
   
   (* we don't use intermediate results
   Out.String(run.name); Out.String(": iterations=1 runtime: ");
-  Out.Int(runTime * 1000, 0); Out.String("us"); Out.Ln;
+  Out.Int(runTime, 0); Out.String("us"); Out.Ln;
   *)
   run.total := run.total + runTime
 END Measure;
@@ -119,7 +119,7 @@ END RunBenchmark;
 PROCEDURE PrintTotal(run: Run);
 BEGIN
   (* we don't need this information
-  Out.String("Total Runtime: "); Out.Int(run.total, 0); Out.String("us"); Out.Ln;
+  Out.String("Total Runtime: "); Out.Int(run.total, 0); Out.String("ms"); Out.Ln;
   *)
 END PrintTotal;
 
@@ -141,15 +141,15 @@ PROCEDURE TestRun*;
 BEGIN
     DoRun("Bounce", 1, 1);
     DoRun("List", 1, 1);
-    DoRun("Mandelbrot", 1, 750);
-(*    
-    DoRun("Richards", 1, 1);
+    DoRun("Mandelbrot", 1, 1);
     DoRun("NBody", 1, 1);
     DoRun("Permute", 1, 1);
+    DoRun("Towers", 1, 1);
+(*    
+    DoRun("Richards", 1, 1);
     DoRun("Queens", 1, 1);
     DoRun("Sieve", 1, 1);
     DoRun("Storage", 1, 1);
-    DoRun("Towers", 1, 1);
 *)
 END TestRun;
 
@@ -157,15 +157,15 @@ PROCEDURE FullRun*;
 BEGIN
     DoRun("Bounce", 1500, 1);
     DoRun("List", 1500, 1);
-(*
-    DoRun("Mandelbrot", 1500, 750);
-    DoRun("Richards", 100, 1);
+    DoRun("Mandelbrot", 500, 1);
     DoRun("NBody", 250000, 1);
     DoRun("Permute", 1000, 1);
+    DoRun("Towers", 600, 1);
+(*
+    DoRun("Richards", 100, 1);
     DoRun("Queens", 1000, 1);
     DoRun("Sieve", 3000, 1);
     DoRun("Storage", 1000, 1);
-    DoRun("Towers", 600, 1);
 *)
 END FullRun;
 

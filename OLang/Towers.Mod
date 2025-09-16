@@ -24,60 +24,65 @@
 MODULE Towers;
 IMPORT Benchmark, SOM, Out;
 
+CONST
+  PilesCount = 3;
+
 TYPE
-  INT32  = SOM.INT32;
-  TowersDisk = POINTER TO TowersDiskDesc;
-  TowersDiskDesc = RECORD (SOM.ObjectDesc)
+  INT32 = SOM.INT32;
+  TowersDisk* = POINTER TO TowersDiskDesc;
+  TowersDiskDesc* = RECORD (SOM.ObjectDesc)
     size: INT32;
-    next: TowersDisk;
+    next: TowersDisk
   END;
 
-  TowersDesc = RECORD (Benchmark.BenchmarkDesc)
-    piles: SOM.Vector;
-    movesDone: INT32;
+  Towers* = POINTER TO TowersDesc;
+  TowersDesc* = RECORD (Benchmark.BenchmarkDesc)
+    piles: ARRAY PilesCount OF TowersDisk;
+    movesDone: INT32
   END;
-  
-  Towers = POINTER TO TowersDesc;
-  
+    
   Result = POINTER TO RECORD (SOM.ObjectDesc) res: INT32 END;
+
+PROCEDURE DisposeTowersDisk(disk: TowersDisk);
+BEGIN
+  IF disk.next # NIL THEN DisposeTowersDisk(disk.next) END;
+  DISPOSE(disk)
+END DisposeTowersDisk;  
 
 PROCEDURE CreateTowersDisk(size: INT32): TowersDisk;
   VAR disk: TowersDisk;
 BEGIN
   NEW(disk);
-  disk.size := size;
   disk.next := NIL;
-  RETURN disk;
+  disk.size := size;
+  RETURN disk
 END CreateTowersDisk;
 
 PROCEDURE PushDisk(b: Towers; disk: TowersDisk; pile: INT32);
-  VAR top: SOM.Object;
+  VAR top: TowersDisk;
 BEGIN
-  top := SOM.VectorAt(b.piles, pile);
-  IF top IS TowersDisk THEN
-    IF disk.size >= top(TowersDisk).size THEN HALT(101) END;
-  ELSE
-    (* pile is empty *)
+  top := b.piles[pile];
+  IF (top # NIL) & (disk.size >= top.size) THEN 
+    HALT(101)
   END;
-  disk.next := top(TowersDisk);
-  SOM.VectorAtPut(b.piles, pile, disk);
+  disk.next := top;
+  b.piles[pile] := disk
 END PushDisk;
 
 PROCEDURE PopDiskFrom(b: Towers; pile: INT32): TowersDisk;
-  VAR top: SOM.Object; topDisk: TowersDisk;
+  VAR top: TowersDisk;
 BEGIN
-  top := SOM.VectorAt(b.piles, pile);
+  top := b.piles[pile];
   IF top = NIL THEN HALT(102) END;
-  topDisk := top(TowersDisk);
-  SOM.VectorAtPut(b.piles, pile, topDisk.next);
-  topDisk.next := NIL;
-  RETURN topDisk;
+  b.piles[pile] := top.next;
+  top.next := NIL;
+  RETURN top
 END PopDiskFrom;
 
 PROCEDURE MoveTopDisk(b: Towers; from, to: INT32);
 BEGIN
   PushDisk(b, PopDiskFrom(b, from), to);
-  INC(b.movesDone);
+  INC(b.movesDone)
 END MoveTopDisk;
 
 PROCEDURE BuildTowerAt(b: Towers; pile, disks: INT32);
@@ -86,51 +91,54 @@ BEGIN
   i := disks;
   WHILE i >= 0 DO
     PushDisk(b, CreateTowersDisk(i), pile);
-    DEC(i);
-  END;
+    DEC(i)
+  END
 END BuildTowerAt;
 
 PROCEDURE MoveDisks(b: Towers; disks, from, to: INT32);
   VAR other: INT32;
 BEGIN
   IF disks = 1 THEN
-    MoveTopDisk(b, from, to);
+    MoveTopDisk(b, from, to)
   ELSE
     other := (3 - from) - to;
     MoveDisks(b, disks - 1, from, other);
     MoveTopDisk(b, from, to);
-    MoveDisks(b, disks - 1, other, to);
-  END;
+    MoveDisks(b, disks - 1, other, to)
+  END
 END MoveDisks;
 
 PROCEDURE DoBenchmark*(b: Benchmark.Benchmark): SOM.Object;
   VAR t: Towers; res: SOM.Object; intRes: Result;
 BEGIN
   t := b(Towers);
-  t.piles := SOM.CreateVector(3);
+  (* t.piles := SOM.CreateVector(3); *)
+  t.piles[0] := NIL;
+  t.piles[1] := NIL;
+  t.piles[2] := NIL;
   BuildTowerAt(t, 0, 13);
   t.movesDone := 0;
   MoveDisks(t, 13, 0, 1);
   NEW(intRes); intRes.res := t.movesDone;
   res := intRes;
-  RETURN res;
+  RETURN res
 END DoBenchmark;
 
 PROCEDURE VerifyResult*(b: Benchmark.Benchmark; result: SOM.Object): BOOLEAN;
   VAR val: INT32;
 BEGIN
   val := result(Result).res;
-  RETURN val = 8191;
+  RETURN val = 8191
 END VerifyResult;
 
-PROCEDURE Create*(): Towers;
+PROCEDURE Create*(): Benchmark.Benchmark;
   VAR t: Towers;
 BEGIN
   NEW(t);
   t.DoBenchmark := DoBenchmark;
   t.VerifyResult := VerifyResult;
   t.InnerBenchmarkLoop := Benchmark.InnerBenchmarkLoop;
-  RETURN t;
+  RETURN t
 END Create;
 
 END Towers.
