@@ -24,7 +24,7 @@ ifeq ($(OS), macos)
 	LDFLAGS += -rpath $(LIB) #@executable_path/lib
 else ifeq ($(OS), linux)
 	CXX = gcc
-	O7CFLAGS += --reloc=pic
+	OLCFLAGS += --reloc=pic
 	LDFLAGS += -lm -Wl,-rpath,$(LIB)
 endif
 
@@ -44,17 +44,7 @@ all: SOM.o Benchmark.o Random.o Bounce.o List.o Mandelbrot.o NBody.o Permute.o T
 	@$(CXX) $(CXXFLAGS) -o run SOM.o Benchmark.o Random.o Bounce.o List.o Mandelbrot.o NBody.o Permute.o Towers.o Harness.o -L$(LIB) $(LDFLAGS)
 
 Harness.o: 
-	@$(OLC) $(OLCFLAGS) -c -fenable-main Harness.Mod
-
-% : %.o
-	@$(CXX) $(CXXFLAGS) $< -o $@ -L$(LIB) $(LDFLAGS)
+	$(OLC) $(OLCFLAGS) -c -fenable-main Harness.Mod
 
 %.o : %.Mod
-	@$(OLC) $(OLCFLAGS) -c $<
-
-%.s : %.Mod
-	@$(OLC) $(OLCFLAGS) -S $<
-
-%.ll : %.Mod
-	@$(OLC) $(OLCFLAGS) -S --emit-llvm $<
-
+	$(OLC) $(OLCFLAGS) -c $<
